@@ -27,7 +27,7 @@ combinator.activity_led_sprites.north, combinator.activity_led_sprites.south = c
 combinator.activity_led_sprites.east, combinator.activity_led_sprites.west = combinator.activity_led_sprites.west, combinator.activity_led_sprites.east
 combinator.circuit_wire_connection_points[1], combinator.circuit_wire_connection_points[3] = combinator.circuit_wire_connection_points[3], combinator.circuit_wire_connection_points[1]
 combinator.circuit_wire_connection_points[2], combinator.circuit_wire_connection_points[4] = combinator.circuit_wire_connection_points[4], combinator.circuit_wire_connection_points[2]
-
+combinator.minable.result = "spoilage-scanner"
 
 local combinator_item = table.deepcopy(data.raw["item"]["constant-combinator"])
 combinator_item.name = "spoilage-scanner"
