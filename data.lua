@@ -49,27 +49,9 @@ local combinator_recipe = {
 table.insert(data.raw["technology"]["advanced-combinators"].effects, { type = "unlock-recipe", recipe = "spoilage-scanner" } )
 
 
--- Debugging shit
-local debug_input_1 = {
-  name = "sc-debug-key-1",
-  type = "custom-input",
-  key_sequence = "l",
-  action = "lua"
-}
-
-local debug_input_2 = {
-  name = "sc-debug-key-2",
-  type = "custom-input",
-  key_sequence = "p",
-  action = "lua"
-}
-
-
 data:extend(
   {
     combinator,
     combinator_item,
     combinator_recipe,
-    debug_input_1,
-    debug_input_2
   })

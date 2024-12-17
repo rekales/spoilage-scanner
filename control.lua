@@ -5,13 +5,11 @@
 --  > choose inventory types to get info (perhaps no longer necessary)
 --  > update interval override
 
-
 local function concat_table(t1, t2)
     for i=1,#t2 do
         t1[#t1+1] = t2[i]
     end
 end
-
 
 local function update_target(entity_data)
     local combinator = entity_data.combinator
@@ -127,18 +125,6 @@ local function update_signals(entity_data)
     end
 end
 
-script.on_event("sc-debug-key-1", function(event)
-    for _,v in pairs(storage.entity_data)
-    do
-        game.print(serpent.line(v.target))
-    end
-end)
-
-script.on_event("sc-debug-key-2", function(event)
-    if #storage.entity_data > 0 then
-        update_target(storage.entity_data[1])
-    end
-end)
 
 -- needs better ticking alg (i.e. don't do everything at the same tick)
 local function on_tick (event)
