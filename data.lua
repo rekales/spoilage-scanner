@@ -13,7 +13,7 @@ combinator.sprites = make_4way_animation_from_spritesheet({
     },
     {
       scale = 0.5,
-      filename = "__base__/graphics/entity/combinator/constant-combinator-shadow.png",
+      filename = "__spoilage-scanner__/graphics/entity/spoilage-scanner-shadow.png",
       width = 98,
       height = 66,
       shift = util.by_pixel(8.5, 5.5),
