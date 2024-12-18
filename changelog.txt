@@ -8,3 +8,9 @@ Version: 0.1.1
 Date: 2024-12-17
   Updates:
     - Removed debugging stuff. oops.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+Date: 2024-12-17
+  Bugfixes:
+    - Changed the spoilage scanner to drop the proper item.
+    - Removed residual signals when the target entity is removed.

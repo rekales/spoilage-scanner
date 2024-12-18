@@ -51,6 +51,9 @@ end
 local function update_signals(entity_data)
     if not entity_data.target then
         -- set light to red
+        local control_behavior = entity_data.combinator.get_control_behavior()
+        if control_behavior.sections_count == 0 then control_behavior.add_section() end
+        control_behavior.get_section(1).filters = {}
         return
     elseif not entity_data.target.valid then
         entity_data.target = nil
