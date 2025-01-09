@@ -1,16 +1,26 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.1.0
-Date: 2024-12-17
+Version: 0.2.1
+Date: 2025-01-09
   Updates:
-    - Initial release.
+    - Fixed 2 crashes when entity is invalid
 ---------------------------------------------------------------------------------------------------
-Version: 0.1.1
-Date: 2024-12-17
+Version: 0.2.0
+Date: 2024-12-18
   Updates:
-    - Removed debugging stuff. oops.
+    - Reworked graphics by snouz
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 2024-12-17
   Bugfixes:
     - Changed the spoilage scanner to drop the proper item.
     - Removed residual signals when the target entity is removed.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 2024-12-17
+  Updates:
+    - Removed debugging stuff. oops.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2024-12-17
+  Updates:
+    - Initial release.
