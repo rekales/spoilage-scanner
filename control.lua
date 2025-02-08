@@ -1,9 +1,10 @@
 -- control.lua
 
 -- gui options (perhaps no longer needed due to small options)
---  > invert freshness/spoilage
+--  > invert freshness/spoilage (although easily implemented with arithmetic)
 --  > choose inventory types to get info (perhaps no longer necessary)
 --  > update interval override
+--  > average/least/most mode switch
 
 local function concat_table(t1, t2)
     for i=1,#t2 do
@@ -53,7 +54,7 @@ end
 local function update_signals(entity_data)
     if (entity_data and entity_data.combinator and entity_data.combinator.valid) then
         if not entity_data.target then
-            -- set light to red
+            -- TODO: set light to red
             local control_behavior = entity_data.combinator.get_control_behavior()
             if control_behavior.sections_count == 0 then control_behavior.add_section() end
             control_behavior.get_section(1).filters = {}
@@ -133,7 +134,7 @@ local function update_signals(entity_data)
 end
 
 
--- needs better ticking alg (i.e. don't do everything at the same tick)
+-- TODO: needs better ticking alg (i.e. don't do everything at the same tick)
 local function on_tick (event)
     if event.tick % settings.global["spoilage-sensor-signal-update-interval"].value == 0 then
         for k,v in pairs(storage.entity_data) do
@@ -150,7 +151,7 @@ end
 
 local function on_entity_created(event)
     local entity = event.entity
-    local entity_data = {combinator = entity, target = nil} 
+    local entity_data = {combinator=entity, target=nil, mode=2}
         table.insert(storage.entity_data, entity_data)
         update_target(entity_data)
 end
@@ -173,6 +174,8 @@ local function on_entity_rotated(event)
 end
 
 
+
+
 local event_filter = {{ filter="name", name="spoilage-scanner" }}
 script.on_event(defines.events.on_built_entity, on_entity_created, event_filter)
 script.on_event(defines.events.on_robot_built_entity, on_entity_created, event_filter)
@@ -189,6 +192,11 @@ script.on_event(defines.events.on_player_rotated_entity, on_entity_rotated)
 script.on_event(defines.events.on_player_flipped_entity, on_entity_rotated)
 script.on_event(defines.events.on_tick, on_tick)
 
+
+-- try using unit_number as key
 script.on_init(function()
     storage.entity_data = {}
 end)
+
+
+require("gui")
