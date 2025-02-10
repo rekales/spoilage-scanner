@@ -1,11 +1,5 @@
 -- control.lua
 
--- TODO: total gui redo
--- Similar to circuit connection gui
--- Display target entity
--- Mode of operation
--- Invert spoilage
-
 local function concat_table(t1, t2)
     for i=1,#t2 do
         t1[#t1+1] = t2[i]
@@ -92,34 +86,48 @@ local function update_signals(entity_data)
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.assembling_machine_output))
         end
 
-        local spoilages = {}
-        local counts = {}
-        for i=1, #inv do
-            local itemStack = inv[i]
-            if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
-                local item_name = inv[i].name
-                if not spoilages[item_name] then 
-                    spoilages[item_name] = 0 
-                    counts[item_name] = 0
-                end
-
-                spoilages[item_name] = spoilages[item_name] + inv[i].spoil_percent * inv[i].count
-                counts[item_name] = counts[item_name] + inv[i].count
-            end
-        end
-
         -- calculate freshness
+        local signals = {}
         if entity_data.mode == 1 then  -- average
-            for k,v in pairs(spoilages) do
-                spoilages[k] = math.ceil(100 - v / counts[k] * 100)
+            local counts = {}
+            for i=1, #inv do
+                local itemStack = inv[i]
+                if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
+                    local item_name = itemStack.name
+                    if not signals[item_name] then
+                        signals[item_name] = 0
+                        counts[item_name] = 0
+                    end
+                    signals[item_name] = signals[item_name] + itemStack.spoil_percent * itemStack.count
+                    counts[item_name] = counts[item_name] + itemStack.count
+                end
+            end
+            for k,v in pairs(signals) do
+                signals[k] = math.ceil(100 - v / counts[k] * 100)
             end
         elseif entity_data.mode == 2 then  -- least
-            for k,v in pairs(spoilages) do
-                spoilages[k] = math.ceil(100 - v / counts[k] * 100)
+            for i=1, #inv do
+                local itemStack = inv[i]
+                if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
+                    local item_name = itemStack.name
+                    if not signals[item_name] then signals[item_name] = 0 end
+                    if signals[item_name] < itemStack.spoil_percent then signals[item_name] = itemStack.spoil_percent end
+                end
+            end
+            for k,v in pairs(signals) do
+                signals[k] = math.ceil(100 - v * 100)
             end
         elseif entity_data.mode == 3 then  -- most
-            for k,v in pairs(spoilages) do
-                spoilages[k] = math.ceil(100 - v / counts[k] * 100)
+            for i=1, #inv do
+                local itemStack = inv[i]
+                if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
+                    local item_name = itemStack.name
+                    if not signals[item_name] then signals[item_name] = 100 end
+                    if signals[item_name] > itemStack.spoil_percent then signals[item_name] = itemStack.spoil_percent end
+                end
+            end
+            for k,v in pairs(signals) do
+                signals[k] = math.ceil(100 - v * 100)
             end
         end
 
@@ -129,7 +137,7 @@ local function update_signals(entity_data)
         local section = control_behavior.get_section(1)
         section.filters = {}
         local i = 1
-        for k,v in pairs(spoilages)
+        for k,v in pairs(signals)
         do
             section.set_slot(i, {value = {type="item", name=k, quality="normal"}, min=v})
             i = i + 1
@@ -190,7 +198,6 @@ script.on_event(defines.events.on_player_flipped_entity, on_entity_rotated)
 script.on_event(defines.events.on_tick, on_tick)
 
 
--- try using unit_number as key
 script.on_init(function()
     storage.entity_data = {}
 end)
