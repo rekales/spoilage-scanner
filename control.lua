@@ -421,6 +421,7 @@ end)
 
 script.on_configuration_changed(function(changes)
     if changes.mod_changes["spoilage-scanner"] 
+            and changes.mod_changes["spoilage-scanner"].old_version
             and changes.mod_changes["spoilage-scanner"].old_version < '0.3.0'
             and changes.mod_changes["spoilage-scanner"].new_version >= '0.3.0' then 
         local temp_table = {}
