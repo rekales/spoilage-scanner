@@ -224,10 +224,10 @@ local function on_gui_opened(event)
     if not player then return end
     if player.gui.relative["scanner-gui"] then player.gui.relative["scanner-gui"].destroy() end
 
-    update_target(storage.entity_data[entity.unit_number])
-
     local entity_data = storage.entity_data[entity.unit_number]
     if not entity_data then return end
+
+    update_target(storage.entity_data[entity.unit_number])
 
     local _, frame = flib_gui.add(player.gui.relative, {
         type = "frame",
@@ -416,4 +416,18 @@ script.on_event(defines.events.on_tick, on_tick)
 
 script.on_init(function()
     storage.entity_data = {}
+end)
+
+
+script.on_configuration_changed(function(changes)
+    if changes.mod_changes["spoilage-scanner"] 
+            and changes.mod_changes["spoilage-scanner"].old_version < '0.3.0'
+            and changes.mod_changes["spoilage-scanner"].new_version >= '0.3.0' then 
+        local temp_table = {}
+        for _,v in pairs(storage.entity_data) do
+            temp_table[v.combinator.unit_number] = v
+            temp_table[v.combinator.unit_number].mode = MODE_AVERAGE
+        end
+        storage.entity_data = temp_table
+    end
 end)
