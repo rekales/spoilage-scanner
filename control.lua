@@ -8,6 +8,14 @@ local flib_gui = require "__flib__.gui"
 --   uses of spoilage scanner is liable for destruction so it would be best for it to be recoverable
 --   could also just don't delete data but that might cause issues
 
+-- TODO: Dynamically update gui to match target
+-- TODO: migrations
+
+local MODE_AVERAGE = 1
+local MODE_LEAST = 2
+local MODE_MOST = 3
+
+
 local function concat_table(t1, t2)
     for i=1,#t2 do
         t1[#t1+1] = t2[i]
@@ -56,7 +64,7 @@ end
 local function update_signals(entity_data)
     if (entity_data and entity_data.combinator and entity_data.combinator.valid) then
         if not entity_data.target then
-            -- TODO: set light to red
+            -- TODO: set entity light to red (or green when there's a target)
             local control_behavior = entity_data.combinator.get_control_behavior()
             if control_behavior.sections_count == 0 then control_behavior.add_section() end
             control_behavior.get_section(1).filters = {}
@@ -66,37 +74,37 @@ local function update_signals(entity_data)
             return
         end
 
-        -- cache entity.type?
+        local entity_type = entity_data.target.type
         local inv = {}
-        if entity_data.target.type == "container" or entity_data.target.type == "logistic-container"then
+        if entity_type == "container" or entity_type == "logistic-container"then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.chest))
-        elseif entity_data.target.type == "assembling-machine" then
+        elseif entity_type == "assembling-machine" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.assembling_machine_input))
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.assembling_machine_output))
             if entity_data.target.burner then
                 concat_table(inv, entity_data.target.get_inventory(defines.inventory.fuel))
             end
-        elseif entity_data.target.type == "furnace" then
+        elseif entity_type == "furnace" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.furnace_source))
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.furnace_result))
-        elseif entity_data.target.type == "lab" then
+        elseif entity_type == "lab" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.lab_input))
-        elseif entity_data.target.type == "reactor" or entity_data.target.type == "boiler" then
+        elseif entity_type == "reactor" or entity_type == "boiler" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.fuel))
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.burnt_result))
-        elseif entity_data.target.type == "rocket-silo" then
+        elseif entity_type == "rocket-silo" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.rocket_silo_rocket))
-        elseif entity_data.target.type == "space-platform-hub" then
+        elseif entity_type == "space-platform-hub" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.hub_main))
-        elseif entity_data.target.type == "cargo-landing-pad" then
+        elseif entity_type == "cargo-landing-pad" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.cargo_landing_pad_main))
-        elseif entity_data.target.type == "agricultural-tower" then
+        elseif entity_type == "agricultural-tower" then
             concat_table(inv, entity_data.target.get_inventory(defines.inventory.assembling_machine_output))
         end
 
         -- calculate freshness
         local signals = {}
-        if entity_data.mode == 1 then  -- average
+        if entity_data.mode == MODE_AVERAGE then
             local counts = {}
             for i=1, #inv do
                 local itemStack = inv[i]
@@ -113,7 +121,7 @@ local function update_signals(entity_data)
             for k,v in pairs(signals) do
                 signals[k] = math.ceil(100 - v / counts[k] * 100)
             end
-        elseif entity_data.mode == 2 then  -- least
+        elseif entity_data.mode == MODE_LEAST then
             for i=1, #inv do
                 local itemStack = inv[i]
                 if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
@@ -125,7 +133,7 @@ local function update_signals(entity_data)
             for k,v in pairs(signals) do
                 signals[k] = math.ceil(100 - v * 100)
             end
-        elseif entity_data.mode == 3 then  -- most
+        elseif entity_data.mode == MODE_MOST then
             for i=1, #inv do
                 local itemStack = inv[i]
                 if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
@@ -172,7 +180,7 @@ end
 local function on_entity_created(event)
     local entity = event.entity
     if storage.entity_data[entity.unit_number] then return end
-    local entity_data = {combinator=entity, target=nil, mode=1}
+    local entity_data = {combinator=entity, target=nil, mode=MODE_AVERAGE}
     storage.entity_data[entity.unit_number] = entity_data
     update_target(entity_data)
 end
@@ -189,7 +197,7 @@ local function on_entity_rotated(event)
 end
 
 
--- GUI SHIT STARTS HERE
+-- GUI CRAP STARTS HERE
 local function on_mode_changed(event)
     local elem = event.element
     if not elem then return end
@@ -197,15 +205,15 @@ local function on_mode_changed(event)
     if elem.name == "ssrb-ave" then
         elem.parent["ssrb-least" ].state = false
         elem.parent["ssrb-most" ].state = false
-        storage.entity_data[elem.tags.unit_number].mode = 1  -- TODO: use constants
+        storage.entity_data[elem.tags.unit_number].mode = MODE_AVERAGE
     elseif elem.name == "ssrb-least" then
         elem.parent["ssrb-ave" ].state = false
         elem.parent["ssrb-most" ].state = false
-        storage.entity_data[elem.tags.unit_number].mode = 2
+        storage.entity_data[elem.tags.unit_number].mode = MODE_LEAST
     elseif elem.name == "ssrb-most" then
         elem.parent["ssrb-ave" ].state = false
         elem.parent["ssrb-least" ].state = false
-        storage.entity_data[elem.tags.unit_number].mode = 3
+        storage.entity_data[elem.tags.unit_number].mode = MODE_MOST
     end
 end
 
@@ -218,9 +226,10 @@ local function on_gui_opened(event)
     if not player then return end
     if player.gui.relative["scanner-gui"] then player.gui.relative["scanner-gui"].destroy() end
 
+    update_target(storage.entity_data[entity.unit_number])
+
     local entity_data = storage.entity_data[entity.unit_number]
     if not entity_data then return end
-    game.print(serpent.line(storage.entity_data[entity.unit_number]))
 
     local _, frame = flib_gui.add(player.gui.relative, {
         type = "frame",
@@ -335,12 +344,12 @@ local function on_gui_opened(event)
             {
                 type = "label",
                 style = "caption_label",
-                caption = "Mode of operation"  -- TODO: make localizable
+                caption = {"gui-control-behavior.mode-of-operation"}
             },
             {
                 name = "ssrb-ave",
                 type = "radiobutton",
-                state = entity_data.mode==1,
+                state = entity_data.mode==MODE_AVERAGE,
                 caption = { "gui.spoilage-sensor-average" },
                 tags = {unit_number = entity.unit_number},
                 handler = {[defines.events.on_gui_checked_state_changed] = on_mode_changed}
@@ -348,7 +357,7 @@ local function on_gui_opened(event)
             {
                 name = "ssrb-least",
                 type = "radiobutton",
-                state = entity_data.mode==2,
+                state = entity_data.mode==MODE_LEAST,
                 caption = { "gui.spoilage-sensor-least" },
                 tags = {unit_number = entity.unit_number},
                 handler = {[defines.events.on_gui_checked_state_changed] = on_mode_changed}
@@ -356,7 +365,7 @@ local function on_gui_opened(event)
             {
                 name = "ssrb-most",
                 type = "radiobutton",
-                state = entity_data.mode==3,
+                state = entity_data.mode==MODE_MOST,
                 caption = { "gui.spoilage-sensor-most" },
                 tags = {unit_number = entity.unit_number},
                 handler = {[defines.events.on_gui_checked_state_changed] = on_mode_changed}
