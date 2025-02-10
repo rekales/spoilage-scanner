@@ -1,10 +1,10 @@
 -- control.lua
 
--- gui options (perhaps no longer needed due to small options)
---  > invert freshness/spoilage (although easily implemented with arithmetic)
---  > choose inventory types to get info (perhaps no longer necessary)
---  > update interval override
---  > average/least/most mode switch
+-- TODO: total gui redo
+-- Similar to circuit connection gui
+-- Display target entity
+-- Mode of operation
+-- Invert spoilage
 
 local function concat_table(t1, t2)
     for i=1,#t2 do
@@ -109,11 +109,15 @@ local function update_signals(entity_data)
         end
 
         -- calculate freshness
-        if settings.global["spoilage-sensor-invert-output"].value then
+        if entity_data.mode == 1 then  -- average
             for k,v in pairs(spoilages) do
-                spoilages[k] = math.ceil(v / counts[k] * 100)
+                spoilages[k] = math.ceil(100 - v / counts[k] * 100)
             end
-        else
+        elseif entity_data.mode == 2 then  -- least
+            for k,v in pairs(spoilages) do
+                spoilages[k] = math.ceil(100 - v / counts[k] * 100)
+            end
+        elseif entity_data.mode == 3 then  -- most
             for k,v in pairs(spoilages) do
                 spoilages[k] = math.ceil(100 - v / counts[k] * 100)
             end
@@ -151,29 +155,22 @@ end
 
 local function on_entity_created(event)
     local entity = event.entity
-    local entity_data = {combinator=entity, target=nil, mode=2}
-        table.insert(storage.entity_data, entity_data)
-        update_target(entity_data)
+    if storage.entity_data[entity.unit_number] then return end
+    local entity_data = {combinator=entity, target=nil, mode=1}
+    storage.entity_data[entity.unit_number] = entity_data
+    update_target(entity_data)
 end
 
 local function on_entity_removed(event)
-    for k,v in pairs(storage.entity_data) do
-        if event.entity == v.combinator then
-            table.remove(storage.entity_data, k)
-        end
-    end
+    storage.entity_data[event.entity.unit_number] = nil
 end
 
 local function on_entity_rotated(event)
-    if not event.entity.name == "spoilage-scanner" then return end
-    for k,v in pairs(storage.entity_data) do
-        if event.entity == v.combinator then
-            update_target(v)
-        end
-    end
+    local entity = event.entity
+    if not entity.name == "spoilage-scanner" then return end
+    if not storage.entity_data[entity.unit_number] then return end
+    update_target(storage.entity_data[entity.unit_number])
 end
-
-
 
 
 local event_filter = {{ filter="name", name="spoilage-scanner" }}

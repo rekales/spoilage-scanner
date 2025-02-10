@@ -4,6 +4,7 @@ Date: 2025-01-31
   Updates:
     - Added GUI
     - Added "least" and "most" modes
+    - Moved "invert output" map settings to individual entity settings
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 2025-01-09
