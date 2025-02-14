@@ -61,7 +61,7 @@ local function update_target(entity_data)
 end
 
 local function update_signals(entity_data)
-    if (entity_data and entity_data.combinator and entity_data.combinator.valid) then return end
+    if not (entity_data and entity_data.combinator and entity_data.combinator.valid) then return end
     if not entity_data.target then
         -- TODO: set entity light to red (or green when there's a target)
         local control_behavior = entity_data.combinator.get_control_behavior()
