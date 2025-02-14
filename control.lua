@@ -9,7 +9,7 @@ local flib_gui = require "__flib__.gui"
 --   could also just don't delete data but that might cause issues
 
 -- TODO: Dynamically update gui to match target
--- TODO: migrations
+-- NOTE: current migration script might be an issue with multiplayer
 
 local MODE_AVERAGE = 1
 local MODE_LEAST = 2
@@ -24,7 +24,7 @@ end
 
 local function update_target(entity_data)
     local combinator = entity_data.combinator
-    if combinator.valid then return end
+    if not combinator.valid then return end
     local target_pos = combinator.position
 
     if combinator.direction == defines.direction.north then
@@ -36,7 +36,7 @@ local function update_target(entity_data)
     elseif combinator.direction == defines.direction.west then
         target_pos.x = target_pos.x - 1
     end
-    
+
     local entities = combinator.surface.find_entities_filtered({
         position = target_pos, 
         type = {
@@ -420,7 +420,7 @@ end)
 
 
 script.on_configuration_changed(function(changes)
-    if changes.mod_changes["spoilage-scanner"] 
+    if changes.mod_changes["spoilage-scanner"]
             and changes.mod_changes["spoilage-scanner"].old_version
             and changes.mod_changes["spoilage-scanner"].old_version < '0.3.0'
             and changes.mod_changes["spoilage-scanner"].new_version >= '0.3.0' then 
