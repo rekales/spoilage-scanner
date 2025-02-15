@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.3.4
+Version: 0.3.3
 Date: 2025-02-15
   Changes:
     - Changed Space Age as an optional dependency
