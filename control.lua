@@ -108,7 +108,7 @@ local function update_signals(entity_data)
         for i=1, #inv do
             local itemStack = inv[i]
             if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
-                local item_name = itemStack.name
+                local item_name = itemStack.name .. "::" .. itemStack.quality.name
                 if not signals[item_name] then
                     signals[item_name] = 0
                     counts[item_name] = 0
@@ -124,7 +124,7 @@ local function update_signals(entity_data)
         for i=1, #inv do
             local itemStack = inv[i]
             if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
-                local item_name = itemStack.name
+                local item_name = itemStack.name .. "::" .. itemStack.quality.name
                 if not signals[item_name] then signals[item_name] = 0 end
                 if signals[item_name] < itemStack.spoil_percent then signals[item_name] = itemStack.spoil_percent end
             end
@@ -136,7 +136,7 @@ local function update_signals(entity_data)
         for i=1, #inv do
             local itemStack = inv[i]
             if itemStack and itemStack.valid_for_read and itemStack.spoil_percent > 0 then
-                local item_name = itemStack.name
+                local item_name = itemStack.name .. "::" .. itemStack.quality.name
                 if not signals[item_name] then signals[item_name] = 100 end
                 if signals[item_name] > itemStack.spoil_percent then signals[item_name] = itemStack.spoil_percent end
             end
@@ -154,7 +154,10 @@ local function update_signals(entity_data)
     local i = 1
     for k,v in pairs(signals)
     do
-        section.set_slot(i, {value = {type="item", name=k, quality="normal"}, min=v})
+        local sep = k:find("::", 1, true)
+        local name = k:sub(1, sep - 1)
+        local quality = k:sub(sep + 2)
+        section.set_slot(i, {value = {type="item", name=name, quality=quality}, min=v})
         i = i + 1
     end
 end
