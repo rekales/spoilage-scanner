@@ -192,9 +192,22 @@ end
 
 local function on_entity_rotated(event)
     local entity = event.entity
-    if not entity.name == "spoilage-scanner" then return end
+    if entity.name ~= "spoilage-scanner" then return end
     if not storage.entity_data[entity.unit_number] then return end
     update_target(storage.entity_data[entity.unit_number])
+end
+
+local function on_entity_settings_pasted(event)
+    local source = event.source
+    local destination = event.destination
+    if source.name ~= "spoilage-scanner" then return end
+    if destination.name ~= "spoilage-scanner" then return end
+    if not storage.entity_data[source.unit_number] then return end
+    if not storage.entity_data[destination.unit_number] then return end
+    if (storage.entity_data[destination.unit_number].mode ~= storage.entity_data[source.unit_number].mode) then
+        game.get_player(event.player_index).play_sound({ path = "utility/paste_activated" })
+        storage.entity_data[destination.unit_number].mode = storage.entity_data[source.unit_number].mode
+    end
 end
 
 
@@ -410,6 +423,7 @@ script.on_event(defines.events.on_robot_mined_entity, on_entity_removed, event_f
 script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed, event_filter)
 script.on_event(defines.events.on_entity_died, on_entity_removed, event_filter)
 script.on_event(defines.events.script_raised_destroy, on_entity_removed, event_filter)
+script.on_event(defines.events.on_entity_settings_pasted, on_entity_settings_pasted)
 script.on_event(defines.events.on_player_rotated_entity, on_entity_rotated)
 script.on_event(defines.events.on_player_flipped_entity, on_entity_rotated)
 script.on_event(defines.events.on_gui_opened, on_gui_opened)
