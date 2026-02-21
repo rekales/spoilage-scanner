@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2026-02-21
+  Changes:
+    - Quality compat
+    - Added setting copy-paste handling
+    - Added blueprint entity configuration handling
+    - Fix versioning (to avoid perpetual 0.x)
+---------------------------------------------------------------------------------------------------
 Version: 0.3.4
 Date: 2025-03-22
   Changes:
