@@ -169,13 +169,13 @@ local function on_tick (event)
     local tickupdate = event.tick % settings.global["spoilage-sensor-signal-update-interval"].value
     local tickscan = event.tick % settings.global["spoilage-sensor-signal-scan-interval"].value
     for k,v in pairs(storage.entity_data) do
-        if tickupdate == ( k % settings.global["spoilage-sensor-signal-update-interval"].value ) then
+        if tickupdate == ( (k + 1) % settings.global["spoilage-sensor-signal-update-interval"].value ) then
             update_signals(v)
         end
     end
 
     for k,v in pairs(storage.entity_data) do
-        if tickscan == ( k % settings.global["spoilage-sensor-signal-scan-interval"].value + 1 ) then
+        if tickscan == ( (k + 1) % settings.global["spoilage-sensor-signal-scan-interval"].value + 1 ) then
             update_target(v)
         end
     end
