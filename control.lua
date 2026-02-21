@@ -185,6 +185,7 @@ local function on_entity_created(event)
     local entity = event.entity
     if storage.entity_data[entity.unit_number] then return end
     local entity_data = {combinator=entity, target=nil, mode=MODE_AVERAGE}
+    if event.tags then entity_data.mode = event.tags.mode end
     storage.entity_data[entity.unit_number] = entity_data
     update_target(entity_data)
 end
@@ -461,10 +462,10 @@ flib_gui.handle_events()
 local event_filter = {{ filter="name", name="spoilage-scanner" }}
 script.on_event(defines.events.on_built_entity, on_entity_created, event_filter)
 script.on_event(defines.events.on_robot_built_entity, on_entity_created, event_filter)
-script.on_event(defines.events.on_entity_cloned, on_entity_cloned, event_filter)
 script.on_event(defines.events.on_space_platform_built_entity, on_entity_created, event_filter)
 script.on_event(defines.events.script_raised_built, on_entity_created, event_filter)
 script.on_event(defines.events.script_raised_revive, on_entity_created, event_filter)
+script.on_event(defines.events.on_entity_cloned, on_entity_cloned, event_filter)
 script.on_event(defines.events.on_player_mined_entity, on_entity_removed, event_filter)
 script.on_event(defines.events.on_robot_mined_entity, on_entity_removed, event_filter)
 script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed, event_filter)
