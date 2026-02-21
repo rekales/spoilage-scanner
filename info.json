@@ -4,6 +4,6 @@
   "title": "Spoilage Scanner",
   "author": "Krei_",
   "factorio_version": "2.0",
-  "dependencies": ["base >= 2.0.0", "?space-age", "flib >= 0.16.0"],
+  "dependencies": ["base >= 2.0.0", "?space-age", "flib >= 0.16.0", "bplib >= 1.1.6"],
   "description": "Adds a spoilage level detector that outputs the freshness level of items inside a container."
 }

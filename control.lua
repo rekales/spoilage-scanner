@@ -1,6 +1,9 @@
 -- control.lua
 
 local flib_gui = require "__flib__.gui"
+local bplib = require("__bplib__.blueprint")
+local BlueprintBuild = bplib.BlueprintBuild
+local BlueprintSetup = bplib.BlueprintSetup
 
 -- NOTE: ghost of destroyed entities have different unit_number than the original entity 
 --   but accessible with ghost_unit_number
@@ -208,6 +211,40 @@ local function on_entity_settings_pasted(event)
         game.get_player(event.player_index).play_sound({ path = "utility/paste_activated" })
         storage.entity_data[destination.unit_number].mode = storage.entity_data[source.unit_number].mode
     end
+end
+
+local function on_player_setup_blueprint(event)
+    local bp_setup = BlueprintSetup:new(event)
+	if not bp_setup then return end
+
+    local map = bp_setup:map_blueprint_indices_to_world_entities()
+	if not map then return end
+
+    for bp_index, entity in pairs(map) do
+		if entity.name == "spoilage-scanner" then
+            if storage.entity_data[entity.unit_number] then 
+                bp_setup:apply_tags(bp_index, { mode = storage.entity_data[entity.unit_number].mode })
+            end
+		end
+	end
+end
+
+local function on_pre_build(event)
+	local bp_build = BlueprintBuild:new(event)
+	if not bp_build then return end
+
+	local overlap_map = bp_build:map_blueprint_indices_to_overlapping_entities(
+		function (bp_entity) return bp_entity.name == "spoilage-scanner" end
+	)
+	if not overlap_map or (not next(overlap_map)) then return end
+
+	local bp_entities = bp_build:get_entities()
+	for bp_index, entity in pairs(overlap_map) do
+		local tags = bp_entities[bp_index].tags or {}
+        if storage.entity_data[entity.unit_number] then 
+            storage.entity_data[entity.unit_number].mode = tags.mode
+        end
+	end
 end
 
 
@@ -424,8 +461,9 @@ script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed
 script.on_event(defines.events.on_entity_died, on_entity_removed, event_filter)
 script.on_event(defines.events.script_raised_destroy, on_entity_removed, event_filter)
 script.on_event(defines.events.on_entity_settings_pasted, on_entity_settings_pasted)
+script.on_event(defines.events.on_player_setup_blueprint, on_player_setup_blueprint)
 script.on_event(defines.events.on_player_rotated_entity, on_entity_rotated)
-script.on_event(defines.events.on_player_flipped_entity, on_entity_rotated)
+script.on_event(defines.events.on_pre_build, on_pre_build)
 script.on_event(defines.events.on_gui_opened, on_gui_opened)
 script.on_event(defines.events.on_gui_closed, on_gui_closed)
 script.on_event(defines.events.on_tick, on_tick)
