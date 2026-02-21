@@ -189,6 +189,16 @@ local function on_entity_created(event)
     update_target(entity_data)
 end
 
+local function on_entity_cloned(event)
+    local source = event.source
+    local destination = event.destination
+    local source_data = storage.entity_data[source.unit_number]
+    if not source_data then return end
+    local destination_data = {combinator=destination, target=nil, mode=source_data.mode}
+    storage.entity_data[destination.unit_number] = destination_data
+    update_target(destination_data)
+end
+
 local function on_entity_removed(event)
     storage.entity_data[event.entity.unit_number] = nil
 end
@@ -451,7 +461,7 @@ flib_gui.handle_events()
 local event_filter = {{ filter="name", name="spoilage-scanner" }}
 script.on_event(defines.events.on_built_entity, on_entity_created, event_filter)
 script.on_event(defines.events.on_robot_built_entity, on_entity_created, event_filter)
-script.on_event(defines.events.on_entity_cloned, on_entity_created, event_filter)
+script.on_event(defines.events.on_entity_cloned, on_entity_cloned, event_filter)
 script.on_event(defines.events.on_space_platform_built_entity, on_entity_created, event_filter)
 script.on_event(defines.events.script_raised_built, on_entity_created, event_filter)
 script.on_event(defines.events.script_raised_revive, on_entity_created, event_filter)
